@@ -1081,7 +1081,6 @@ export class UsageDashboardComponent implements Component {
 				? `${scrollHint}${refreshHint}${cancel} ${tuiT("ui.back", "back")}`
 				: `${scrollHint}${refreshHint}${formatKeyHint("enter")} ${tuiT("ui.usageDashboard.details", "details")} · ${cancel} ${tuiT("ui.close", "close")}`;
 
-
 		this.#panel.title = title;
 		this.#header.setLines([checkedText ? theme.fg("dim", checkedText) : ""]);
 		this.#body.setLines(contentSource.slice(this.#scroll, this.#scroll + contentRows));
