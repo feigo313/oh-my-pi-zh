@@ -7,26 +7,34 @@ import { col, span, text } from "../../native/describe";
 import type { NativeNode } from "../../native/node";
 import { Memo } from "../../native/memo";
 import type { SetupScene, SetupSceneController, SetupSceneHost } from "./types";
+import { tuiT } from "../../i18n-host";
 
-const INTRO =
-	"Updates install through whatever installed omp: the standalone binary, Homebrew, mise, bun, or npm. Change this later in /settings.";
+function introText(): string {
+	return tuiT(
+		"ui.setupUpdates.intro",
+		"Updates install through whatever installed omp: the standalone binary, Homebrew, mise, bun, or npm. Change this later in /settings.",
+	);
+}
 
-const UPDATE_ITEMS: readonly SelectItem[] = [
-	{
-		value: "auto",
-		label: "1  Update automatically",
-		description: "Installs in the background; the next launch runs it",
-	},
-	{
-		value: "notify",
-		label: "2  Notify me",
-		description: "Show a notice on startup; run omp update yourself",
-	},
-];
+function updateItems(): readonly SelectItem[] {
+	return [
+		{
+			value: "auto",
+			label: tuiT("ui.setupUpdates.itemAuto", "1  Update automatically"),
+			description: tuiT("ui.setupUpdates.itemAutoDesc", "Installs in the background; the next launch runs it"),
+		},
+		{
+			value: "notify",
+			label: tuiT("ui.setupUpdates.itemNotify", "2  Notify me"),
+			description: tuiT("ui.setupUpdates.itemNotifyDesc", "Show a notice on startup; run omp update yourself"),
+		},
+	];
+}
 
 class UpdatesSceneController implements SetupSceneController {
-	title = "Keep omp up to date";
-	subtitle = "Choose how new releases reach you.";
+	title = tuiT("ui.setupUpdates.title", "Keep omp up to date");
+	subtitle = tuiT("ui.setupUpdates.subtitle", "Choose how new releases reach you.");
+	#items: readonly SelectItem[];
 	#selectList: SelectList;
 	#committing = false;
 	#step: WizardStep | undefined;
@@ -36,7 +44,8 @@ class UpdatesSceneController implements SetupSceneController {
 
 	constructor(host: SetupSceneHost) {
 		this.#host = host;
-		this.#selectList = new SelectList(UPDATE_ITEMS, UPDATE_ITEMS.length, getSelectListTheme());
+		this.#items = updateItems();
+		this.#selectList = new SelectList(this.#items, this.#items.length, getSelectListTheme());
 		this.#selectList.setSelectedIndex(host.ctx.autoUpdate ? 0 : 1);
 		this.#selectList.onSelect = item => {
 			void this.#commit(item.value === "auto");
@@ -71,11 +80,11 @@ class UpdatesSceneController implements SetupSceneController {
 	render(width: number, maxLines?: number): readonly string[] {
 		this.#step ??= new WizardStep({
 			kind: "choice",
-			intro: new Text(theme.fg("muted", INTRO), 0, 0),
+			intro: new Text(theme.fg("muted", introText()), 0, 0),
 			content: this.#selectList,
-			minContentLines: UPDATE_ITEMS.length,
+			minContentLines: this.#items.length,
 			fitContent: () => {
-				this.#selectList.setMaxVisible(UPDATE_ITEMS.length);
+				this.#selectList.setMaxVisible(this.#items.length);
 			},
 		});
 		this.#step.setMaxHeight(maxLines);
@@ -84,7 +93,7 @@ class UpdatesSceneController implements SetupSceneController {
 
 	describe(): NativeNode {
 		return this.#native.get([this.#selectList], () =>
-			col([text([span(INTRO, "muted")], { wrap: "word" }), this.#selectList], {
+			col([text([span(introText(), "muted")], { wrap: "word" }), this.#selectList], {
 				gap: "sm",
 				role: "omp.setup.updates",
 			}),
@@ -108,8 +117,12 @@ class UpdatesSceneController implements SetupSceneController {
  */
 export const updatesSetupScene: SetupScene = {
 	id: "auto-update",
-	title: "Keep omp up to date",
-	step: "Updates",
+	get title(): string {
+		return tuiT("ui.setupUpdates.title", "Keep omp up to date");
+	},
+	get step(): string {
+		return tuiT("ui.setupUpdates.step", "Updates");
+	},
 	minVersion: 3,
 	shouldRun: ctx => ctx.canAutoUpdate(),
 	mount: host => new UpdatesSceneController(host),

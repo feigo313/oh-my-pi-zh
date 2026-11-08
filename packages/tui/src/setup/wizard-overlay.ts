@@ -14,6 +14,7 @@ import { Memo } from "../native/memo";
 import { actionButton } from "../native/overlay";
 import { isNativeRendering } from "../native/state";
 import type { SetupHost } from "./scenes/types";
+import { tuiT } from "../i18n-host";
 import { describeSetupOutro, renderSetupOutro, SETUP_OUTRO_MS } from "./scenes/outro";
 import { describeSetupSplash, renderSetupSplash, SETUP_SPLASH_MS, SETUP_TICK_MS } from "./scenes/splash";
 import {
@@ -67,7 +68,12 @@ function stepNode(label: string, position: number, state: StepState): NativeNode
 
 function sceneFooterHint(): string {
 	const navKeys = editorKeys("tui.select.up", "tui.select.down");
-	return `${navKeys} select · ${editorKey("tui.select.confirm")} confirm · ${editorKey("tui.select.cancel")} skip · ${formatKeyHint("ctrl+c")} exit setup`;
+	return tuiT("ui.setupWizard.footer", "{nav} select · {confirm} confirm · {cancel} skip · {exit} exit setup", {
+		nav: navKeys,
+		confirm: editorKey("tui.select.confirm"),
+		cancel: editorKey("tui.select.cancel"),
+		exit: formatKeyHint("ctrl+c"),
+	});
 }
 
 function indentLine(line: string, width: number, indent: number): string {
@@ -345,7 +351,10 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 										"name",
 									),
 									keyed(
-										text([span("Setup", "muted")], { wrap: "none", role: "omp.setup.brand.label" }),
+										text([span(tuiT("ui.setupWizard.brand", "Setup"), "muted")], {
+											wrap: "none",
+											role: "omp.setup.brand.label",
+										}),
 										"label",
 									),
 								],
@@ -354,7 +363,7 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 							"brand",
 						),
 						keyed(row(steps, { align: "center", role: "omp.setup.steps" }), "steps"),
-						actionButton("Exit setup", "exit", { keys: "ctrl+c" }),
+						actionButton(tuiT("ui.setupWizard.exit", "Exit setup"), "exit", { keys: "ctrl+c" }),
 					],
 					{ align: "center", role: "omp.setup.head" },
 				),
@@ -372,7 +381,7 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 	#describeScene(pickers: boolean): NativeNode {
 		const scene = this.scenes[this.#sceneIndex];
 		const active = this.#activeScene;
-		const title = active?.title ?? scene?.title ?? "Setup";
+		const title = active?.title ?? scene?.title ?? tuiT("ui.setupWizard.fallbackTitle", "Setup");
 		const subtitle = active?.subtitle;
 		const head = this.#describeHead();
 		return this.#nativeScene.get([head, active, title, subtitle, pickers], () => {
@@ -401,7 +410,7 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 
 	#renderScene(width: number, height: number): string[] {
 		const scene = this.scenes[this.#sceneIndex];
-		const title = this.#activeScene?.title ?? scene?.title ?? "Setup";
+		const title = this.#activeScene?.title ?? scene?.title ?? tuiT("ui.setupWizard.fallbackTitle", "Setup");
 		const subtitle = this.#activeScene?.subtitle;
 		const { scenes: steps, current } = this.#steps();
 		const contentWidth = Math.max(MIN_CONTENT_WIDTH, width - SCENE_MARGIN_X * 2);
@@ -410,7 +419,16 @@ export class SetupWizardComponent implements Component, OverlayFocusOwner {
 			"",
 			...logo.map(line => centerLine(line, width)),
 			centerLine(theme.bold(theme.fg("accent", APP_NAME)), width),
-			centerLine(theme.fg("muted", `Setup step ${current + 1} of ${steps.length}`), width),
+			centerLine(
+				theme.fg(
+					"muted",
+					tuiT("ui.setupWizard.stepN", "Setup step {current} of {total}", {
+						current: current + 1,
+						total: steps.length,
+					}),
+				),
+				width,
+			),
 			"",
 			indentLine(theme.bold(title), width, SCENE_MARGIN_X),
 		];

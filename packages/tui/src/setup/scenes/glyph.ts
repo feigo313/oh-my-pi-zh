@@ -8,6 +8,7 @@ import { col, span, text } from "../../native/describe";
 import type { NativeNode } from "../../native/node";
 import { Memo } from "../../native/memo";
 import type { SetupScene, SetupSceneController, SetupSceneHost } from "./types";
+import { tuiT } from "../../i18n-host";
 
 const GLYPH_PRESETS = ["nerd", "unicode", "ascii"] as const satisfies readonly SymbolPreset[];
 
@@ -31,8 +32,8 @@ const GLYPH_ITEMS: readonly SelectItem[] = GLYPH_PRESETS.map((preset, index) => 
 }));
 
 class GlyphSceneController implements SetupSceneController {
-	title = "Choose glyph mode";
-	subtitle = "Pick the row that renders cleanly in your terminal.";
+	title = tuiT("ui.setupGlyph.title", "Choose glyph mode");
+	subtitle = tuiT("ui.setupGlyph.subtitle", "Pick the row that renders cleanly in your terminal.");
 	#selectList: SelectList;
 	#previewRequest = 0;
 	#committing = false;
@@ -135,8 +136,12 @@ class GlyphSceneController implements SetupSceneController {
  */
 export const glyphSetupScene: SetupScene = {
 	id: "glyph-mode",
-	title: "Choose glyph mode",
-	step: "Symbols",
+	get title(): string {
+		return tuiT("ui.setupGlyph.title", "Choose glyph mode");
+	},
+	get step(): string {
+		return tuiT("ui.setupGlyph.step", "Symbols");
+	},
 	minVersion: 1,
 	ansiOnly: true,
 	shouldRun: () => !TERMINAL.glyphProtocol,

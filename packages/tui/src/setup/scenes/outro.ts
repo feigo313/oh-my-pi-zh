@@ -7,6 +7,7 @@ import { col, compact, keyed, node, span, text } from "../../native/describe";
 import type { NativeNode } from "../../native/node";
 import { Memo } from "../../native/memo";
 import { renderStarfield, SETUP_TICK_MS } from "./splash";
+import { tuiT } from "../../i18n-host";
 
 export const SETUP_OUTRO_MS = 1200;
 
@@ -24,18 +25,34 @@ export function describeSetupOutro(model: string | undefined): NativeNode {
 			compact([
 				node("spacer", { grow: 1 }, undefined, "top"),
 				node("image", { builtin: "omp", alt: APP_NAME, w: 72, role: "omp.setup.outro.mark" }, undefined, "logo"),
-				keyed(text([span("You're all set", "strong")], { wrap: "none", role: "omp.setup.outro.title" }), "title"),
+				keyed(
+					text([span(tuiT("ui.setupOutro.allSet", "You're all set"), "strong")], {
+						wrap: "none",
+						role: "omp.setup.outro.title",
+					}),
+					"title",
+				),
 				model !== undefined &&
 					keyed(
-						text([span("Default model", "muted"), span(" · ", "dim"), span(model, "muted")], {
-							wrap: "none",
-							truncate: "end",
-							role: "omp.setup.outro.model",
-						}),
+						text(
+							[
+								span(tuiT("ui.setupOutro.defaultModel", "Default model"), "muted"),
+								span(" · ", "dim"),
+								span(model, "muted"),
+							],
+							{
+								wrap: "none",
+								truncate: "end",
+								role: "omp.setup.outro.model",
+							},
+						),
 						"model",
 					),
 				keyed(
-					text([span(`Starting ${APP_NAME}…`, "muted")], { wrap: "none", role: "omp.setup.outro.status" }),
+					text([span(tuiT("ui.setupOutro.starting", "Starting {app}…", { app: APP_NAME }), "muted")], {
+						wrap: "none",
+						role: "omp.setup.outro.status",
+					}),
 					"status",
 				),
 				node("progress", { value: null, role: "omp.setup.outro.progress" }, undefined, "progress"),
@@ -51,8 +68,10 @@ export function renderSetupOutro(width: number, height: number, elapsedMs: numbe
 	const lines = renderStarfield(width, height, frame + 1000);
 	const progress = Math.max(0, Math.min(1, elapsedMs / SETUP_OUTRO_MS));
 	const logo = gradientLogo(PI_LOGO, progress * 1.2, { pos: (progress * 2) % 1, strength: 1 - progress });
-	const title = theme.bold(theme.fg("success", `${theme.status.success} Setup saved`));
-	const subtitle = theme.fg("muted", "Handing off to the normal CLI…");
+	const title = theme.bold(
+		theme.fg("success", `${theme.status.success} ${tuiT("ui.setupOutro.saved", "Setup saved")}`),
+	);
+	const subtitle = theme.fg("muted", tuiT("ui.setupOutro.handoff", "Handing off to the normal CLI…"));
 	const sweepWidth = Math.max(1, Math.min(width - 8, Math.floor((width - 8) * progress)));
 	const sweep = `${theme.fg("accent", "━".repeat(sweepWidth))}${theme.fg("dim", "─".repeat(Math.max(0, width - 8 - sweepWidth)))}`;
 	const content = [...logo, "", title, subtitle, "", sweep];

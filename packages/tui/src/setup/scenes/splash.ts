@@ -6,6 +6,7 @@ import { theme } from "../../theme/theme";
 import { formatKeyHint } from "../../app-keybindings";
 import { col, kbd, keyed, node, row, span, text } from "../../native/describe";
 import type { NativeNode } from "../../native/node";
+import { tuiT } from "../../i18n-host";
 
 export const SETUP_SPLASH_MS = 2600;
 export const SETUP_TICK_MS = 33;
@@ -28,7 +29,7 @@ const MIN_SCENE_HEIGHT = 22;
 
 /** Skip affordance; built at render time so it follows the live symbol preset. */
 function skipHint(): string {
-	return `press ${formatKeyHint("enter")} to skip`;
+	return tuiT("ui.setupSplash.skipHint", "press {enter} to skip", { enter: formatKeyHint("enter") });
 }
 
 function starAt(x: number, y: number, frame: number): string {
