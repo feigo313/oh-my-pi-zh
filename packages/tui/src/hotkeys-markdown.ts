@@ -193,6 +193,8 @@ function hotkeyGroups(bindings: HotkeysMarkdownBindings): HotkeyGroup[] {
 					keys: [act("app.editor.external")],
 					action: tuiT("hotkeys.other.externalEditor", "Edit message in external editor"),
 				},
+
+
 				{ keys: [act("app.local.open")], action: "Open a local:// file in external editor" },
 				{ keys: [act("app.retry")], action: tuiT("hotkeys.other.retry", "Retry last failed assistant turn") },
 				{

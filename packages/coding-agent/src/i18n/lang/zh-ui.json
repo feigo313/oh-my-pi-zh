@@ -387,6 +387,7 @@
 	"ui.find.scoreTitle": "得分 {score}",
 	"ui.find.title": "查找",
 	"ui.find.tokens": "{count} tokens",
+	"ui.find.timedOut": "已超时，已核验 {verified}/{passages} 段",
 	"ui.find.unknownError": "未知错误",
 	"ui.find.zeroHits": "0 条结果",
 	"ui.gitSidebar.amendHint": "修补上一次提交",

@@ -1580,6 +1580,7 @@ export class AskDialogComponent implements Component {
 			state.note = note.text;
 			state.noteImages = note.images;
 			state.noteRowKey = rowItem.key;
+			this.#justAnswered = undefined;
 		} finally {
 			this.#promptActive = false;
 			this.#runDeferredTimeout();

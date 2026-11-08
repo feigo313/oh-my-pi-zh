@@ -1080,6 +1080,8 @@ export class UsageDashboardComponent implements Component {
 			this.#view === "detail"
 				? `${scrollHint}${refreshHint}${cancel} ${tuiT("ui.back", "back")}`
 				: `${scrollHint}${refreshHint}${formatKeyHint("enter")} ${tuiT("ui.usageDashboard.details", "details")} · ${cancel} ${tuiT("ui.close", "close")}`;
+
+
 		this.#panel.title = title;
 		this.#header.setLines([checkedText ? theme.fg("dim", checkedText) : ""]);
 		this.#body.setLines(contentSource.slice(this.#scroll, this.#scroll + contentRows));
@@ -1938,10 +1940,11 @@ export class UsageDashboardComponent implements Component {
 			void this.#refresh();
 			return;
 		}
-		if (
-			this.#view === "overview" &&
-			(matchesKey(data, "return") || matchesKey(data, "tab") || matchesKey(data, "d"))
-		) {
+		if (matchesKey(data, "tab")) {
+			this.#setView(this.#view === "overview" ? "detail" : "overview");
+			return;
+		}
+		if (this.#view === "overview" && (matchesKey(data, "return") || matchesKey(data, "d"))) {
 			this.#setView("detail");
 			return;
 		}

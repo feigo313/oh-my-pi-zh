@@ -61,9 +61,16 @@ export interface FindHit {
 /**
  * How much of a search the judge actually covered. `unavailable`: every judge
  * request failed, so an empty result is not evidence of absence. `partial`:
- * some requests failed. `complete`: none failed (or none were needed).
+ * some requests failed, or the call's deadline cut verification short.
+ * `complete`: none failed (or none were needed).
  */
 export type FindCoverage = "complete" | "partial" | "unavailable";
+
+/** Verification cut short by the call's deadline: complete passages verified of those routed to it. */
+export interface FindTimeout {
+	verified: number;
+	passages: number;
+}
 
 /** Search accounting reported alongside the hits. */
 export interface FindStats {
@@ -100,6 +107,8 @@ export interface FindToolDetails {
 	hits: FindHit[];
 	coverage: FindCoverage;
 	stats: FindStats;
+	/** Set when the deadline ended verification; the hits are those verified before it. */
+	timeout?: FindTimeout;
 	elapsedMs: number;
 	/** Session cwd; hit paths are relative to it. */
 	cwd: string;
@@ -364,6 +373,9 @@ export const findToolRenderer = {
 		];
 		const failed = stats.failed > 0 ? failedLabel(stats.failed) : undefined;
 		if (failed) meta.push(uiTheme.fg("warning", failed));
+		const { timeout } = details;
+		if (timeout)
+			meta.push(uiTheme.fg("warning", `timed out, ${timeout.verified}/${timeout.passages} passages verified`));
 
 		if (hits.length === 0) {
 			const emptyMeta = [
@@ -469,6 +481,14 @@ export const findToolRenderer = {
 		const linkTargets = findLinkTargets(details, options.renderContext?.rawDetails);
 		const scope = details.scopePath === undefined ? undefined : inPathLabel(details.scopePath);
 		const failed = stats.failed > 0 ? [span(failedLabel(stats.failed), "warning")] : undefined;
+		const { timeout } = details;
+		const timedOutLabel = timeout
+			? tuiT("ui.find.timedOut", "timed out, {verified}/{passages} passages verified", {
+					verified: timeout.verified,
+					passages: timeout.passages,
+				})
+			: undefined;
+		const timedOut = timedOutLabel ? [span(timedOutLabel, "warning")] : undefined;
 		const accounting = findAccounting(stats, threshold, details.elapsedMs);
 		const failures = stats.failures.map((failure, i) =>
 			keyed(text([span(failure, "warning")], { wrap: "word", role: "omp.tool.notice" }), `fail${i}`),
@@ -496,7 +516,7 @@ export const findToolRenderer = {
 		return {
 			tool: findNativeHead(
 				query,
-				compact([`${hitCountLabel(hits.length)} · ${fileCountLabel(stats.filesRead)}`, scope, failed]),
+				compact([`${hitCountLabel(hits.length)} · ${fileCountLabel(stats.filesRead)}`, scope, failed, timedOut]),
 			),
 			inline: true,
 			body: compact<NativeChild>([
