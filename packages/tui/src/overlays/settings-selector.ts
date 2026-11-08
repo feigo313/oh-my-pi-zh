@@ -503,23 +503,40 @@ class ProviderLimitsSubmenu extends Container {
 			return {
 				value: provider,
 				label: provider,
-				description: limit === undefined ? "Unlimited" : `Limit: ${limit}`,
+				description:
+					limit === undefined
+						? interceptUIString("ui.settingsSelector.unlimited", "Unlimited")
+						: interceptUIString("ui.settingsSelector.providerLimit", "Limit: {limit}", { limit }),
 			};
 		});
 		const clearItem: SelectItem[] =
 			Object.keys(limits).length === 0
 				? []
-				: [{ value: "__clear_all", label: "Clear all limits", description: "Make every provider unlimited" }];
+				: [
+						{
+							value: "__clear_all",
+							label: interceptUIString("ui.settingsSelector.clearAll", "Clear all limits"),
+							description: interceptUIString(
+								"ui.settingsSelector.clearAllDesc",
+								"Make every provider unlimited",
+							),
+						},
+					];
 		const items = [...providerItems, ...clearItem];
 		this.#listField = new SelectFormField({
 			theme: formTheme,
-			label: "Max In-Flight Requests",
-			description:
+			label: interceptUIString("ui.settingsSelector.limitLabel", "Max In-Flight Requests"),
+			description: interceptUIString(
+				"ui.settingsSelector.limitDesc",
 				"Select a provider, enter a positive number to cap concurrent LLM requests, or clear it for unlimited.",
+			),
 			items,
 			maxVisible: 12,
 			selectTheme: getSelectListTheme(),
-			hint: `  ${editorKey("tui.select.confirm")} to edit provider · ${editorKey("tui.select.cancel")} to go back`,
+			hint: interceptUIString("ui.settingsSelector.editHint", "  {confirm} to edit provider · {cancel} to go back", {
+				confirm: editorKey("tui.select.confirm"),
+				cancel: editorKey("tui.select.cancel"),
+			}),
 			onSubmit: value => {
 				if (value === "__clear_all") {
 					this.#settings.set("providers.maxInFlightRequests", {});
@@ -543,9 +560,13 @@ class ProviderLimitsSubmenu extends Container {
 		this.addChild(
 			new TextFormField({
 				theme: formTheme,
-				label: `Max In-Flight Requests: ${provider}`,
-				description:
+				label: interceptUIString("ui.settingsSelector.providerLabel", "Max In-Flight Requests: {provider}", {
+					provider,
+				}),
+				description: interceptUIString(
+					"ui.settingsSelector.providerLimitDesc",
 					"Enter a positive number. Decimals round down. Clear the field to make this provider unlimited.",
+				),
 				initialValue: limits[provider]?.toString() ?? undefined,
 				empty: "submit",
 				hint: interceptUIString(
@@ -556,7 +577,11 @@ class ProviderLimitsSubmenu extends Container {
 				validate: value => {
 					if (value.trim() === "") return undefined;
 					const limit = Number(value.trim());
-					if (!Number.isFinite(limit) || limit <= 0) return "Limit must be a positive number.";
+					if (!Number.isFinite(limit) || limit <= 0)
+						return interceptUIString(
+							"ui.settingsSelector.limitMustBePositive",
+							"Limit must be a positive number.",
+						);
 					return undefined;
 				},
 				onSubmit: value => {

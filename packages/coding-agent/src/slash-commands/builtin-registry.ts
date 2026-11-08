@@ -19,6 +19,7 @@ import { BUILTIN_MARKETPLACE_SLASH_COMMANDS, reloadTuiPluginState } from "./buil
 import { BUILTIN_MODE_SLASH_COMMANDS } from "./builtin-modes";
 import { BUILTIN_SESSION_SLASH_COMMANDS } from "./builtin-session";
 import { BUILTIN_SKILLS_SLASH_COMMANDS } from "./builtin-skills";
+import { slashCommandDescription, subcommandDescription } from "../i18n/interceptor";
 import { parseSlashCommand } from "./helpers/parse";
 import type {
 	BuiltinSlashCommand,
@@ -26,6 +27,7 @@ import type {
 	SlashCommandResult,
 	SlashCommandRuntime,
 	SlashCommandSpec,
+	SubcommandDef,
 	TuiSlashCommandRuntime,
 } from "./types";
 
@@ -68,15 +70,31 @@ export const BUILTIN_SLASH_COMMAND_DEFS: ReadonlyArray<BuiltinSlashCommand> = BU
 		allowArgs: command.allowArgs === true,
 		// Getter: some descriptions name keys, formatted at read time (theme/preset may change).
 		get description() {
-			return command.description;
+			// Localized at read time: /settings switches language without rebuilding this
+			// registry, and the upstream literal is the fallback for any unfilled command.
+			return slashCommandDescription(command.name, command.description);
 		},
 		icon: command.icon,
-		subcommands: command.subcommands,
+		subcommands: localizeSubcommands(command.name, command.subcommands),
 		subcommandOptional: command.subcommandOptional,
 		inlineHint: command.inlineHint,
 		getTuiAutocompleteDescription: command.getTuiAutocompleteDescription,
 	}),
 );
+
+/** Subcommand palette text, localized by the same rule as the command description. */
+function localizeSubcommands(
+	commandName: string,
+	subcommands: readonly SubcommandDef[] | undefined,
+): SubcommandDef[] | undefined {
+	if (!subcommands) return undefined;
+	return subcommands.map(sub => ({
+		...sub,
+		get description() {
+			return subcommandDescription(commandName, sub.name, sub.description);
+		},
+	}));
+}
 
 function materializeTuiBuiltinSlashCommand(
 	cmd: BuiltinSlashCommand,

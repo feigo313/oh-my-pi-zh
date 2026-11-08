@@ -362,7 +362,7 @@
   "settings.serviceTier.label": "服务等级",
   "settings.serviceTierAdvisor.description": "advisor 模型的服务等级。无 = 标准处理；继承 = 匹配主 agent 的实时等级；选择值（如 Priority）使 advisor 在更快的服务路径上运行。",
   "settings.serviceTierAdvisor.label": "服务等级 - 顾问",
-  "settings.serviceTierSubagent.description": "子代理的服务层级：继承主代理或固定值",
+  "settings.serviceTierSubagent.description": "任务/评测子代理的服务等级。继承 = 匹配主 agent 的实时等级（随 /fast 变化）；选择固定值则子代理独立生效。",
   "settings.serviceTierSubagent.label": "服务等级 - 子代理",
   "settings.skillful.description": "在系统提示词中列出可用技能;禁用可节省上下文,并可用 /skillful 按会话切换",
   "settings.skillful.label": "提示词技能列表",

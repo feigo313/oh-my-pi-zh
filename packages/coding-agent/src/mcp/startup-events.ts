@@ -1,5 +1,6 @@
 import { type } from "@oh-my-pi/omptype";
 import { sanitizeText } from "@oh-my-pi/pi-utils";
+import { t } from "../i18n";
 import {
 	replaceTabs,
 	shortenEmbeddedPaths,
@@ -45,15 +46,12 @@ function formatServerList(serverNames: readonly string[]): string {
 	return serverNames.map(sanitizeMcpServerName).join(", ");
 }
 
-function formatServerCount(count: number): string {
-	return count === 1 ? "server" : "servers";
-}
 function sanitizeMcpStatusError(error: string): string {
 	return sanitizeMcpStatusText(error, TRUNCATE_LENGTHS.CONTENT);
 }
 
 export function formatMCPConnectingMessage(serverNames: readonly string[]): string {
-	return `Connecting to MCP servers: ${formatServerList(serverNames)}…`;
+	return t("cli.mcp.connectingServers", "Connecting to MCP servers: {list}…", { list: formatServerList(serverNames) });
 }
 
 function formatFailedServer({ serverName, error, sourcePath }: McpConnectionFailure): string {
@@ -71,23 +69,44 @@ export function formatMCPConnectionStatusMessage(snapshot: McpConnectionStatusSn
 		}
 		const parts: string[] = [];
 		if (connectedServers.length > 0) {
-			parts.push(`Connected: ${formatServerList(connectedServers)}.`);
+			parts.push(t("cli.mcp.connectedList", "Connected: {list}.", { list: formatServerList(connectedServers) }));
 		}
 		if (failedServers.length > 0) {
-			parts.push(`Failed: ${failedServers.map(formatFailedServer).join("; ")}.`);
+			parts.push(
+				t("cli.mcp.failedList", "Failed: {list}.", { list: failedServers.map(formatFailedServer).join("; ") }),
+			);
 		}
-		parts.push(`Still connecting: ${formatServerList(pendingServers)}…`);
+		parts.push(t("cli.mcp.stillConnecting", "Still connecting: {list}…", { list: formatServerList(pendingServers) }));
 		return parts.join(" ");
 	}
 	if (failedServers.length > 0) {
 		const failureText = failedServers.map(formatFailedServer).join("; ");
 		if (connectedServers.length === 0) {
-			return `MCP ${formatServerCount(failedServers.length)} failed to connect: ${failureText}`;
+			return failedServers.length === 1
+				? t("cli.mcp.failedToConnectOne", "MCP {count} server failed to connect: {detail}", {
+						count: failedServers.length,
+						detail: failureText,
+					})
+				: t("cli.mcp.failedToConnect", "MCP {count} servers failed to connect: {detail}", {
+						count: failedServers.length,
+						detail: failureText,
+					});
 		}
-		return `MCP finished with failures. Connected: ${formatServerList(connectedServers)}. Failed: ${failureText}`;
+		return t("cli.mcp.finishedWithFailures", "MCP finished with failures. Connected: {ok}. Failed: {bad}", {
+			ok: formatServerList(connectedServers),
+			bad: failureText,
+		});
 	}
 	if (connectedServers.length > 0) {
-		return `Connected to MCP ${formatServerCount(connectedServers.length)}: ${formatServerList(connectedServers)}.`;
+		return connectedServers.length === 1
+			? t("cli.mcp.connectedToServerOne", "Connected to MCP {count} server: {list}.", {
+					count: connectedServers.length,
+					list: formatServerList(connectedServers),
+				})
+			: t("cli.mcp.connectedToServers", "Connected to MCP {count} servers: {list}.", {
+					count: connectedServers.length,
+					list: formatServerList(connectedServers),
+				});
 	}
 	return "";
 }

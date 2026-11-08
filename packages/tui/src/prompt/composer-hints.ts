@@ -12,6 +12,7 @@
  */
 import { formatDoubleTap, formatKeyHint, type KeybindingsManager } from "../app-keybindings";
 import { theme } from "../theme/theme";
+import { tuiT } from "../i18n-host";
 
 /** Stable hint ids; persisted as usage-counter keys, so never rename one. */
 export type ComposerHintId = "agents" | "effort";
@@ -49,7 +50,14 @@ export const COMPOSER_HINTS: readonly ComposerHint[] = [
 			if (ctx.runningAgents === 0 || ctx.focusedOnAgent) return undefined;
 			return {
 				key: formatDoubleTap("left"),
-				label: `to see ${ctx.runningAgents} running ${ctx.runningAgents === 1 ? "agent" : "agents"}`,
+				label:
+					ctx.runningAgents === 1
+						? tuiT("ui.composerHint.runningAgentsOne", "to see {count} running agent", {
+								count: ctx.runningAgents,
+							})
+						: tuiT("ui.composerHint.runningAgents", "to see {count} running agents", {
+								count: ctx.runningAgents,
+							}),
 			};
 		},
 	},
@@ -59,7 +67,9 @@ export const COMPOSER_HINTS: readonly ComposerHint[] = [
 		resolve: ctx => {
 			if (ctx.conversationStarted) return undefined;
 			const key = ctx.keybindings.getKeys("app.thinking.cycle")[0];
-			return key ? { key: formatKeyHint(key), label: "to change thinking effort" } : undefined;
+			return key
+				? { key: formatKeyHint(key), label: tuiT("ui.composerHint.changeEffort", "to change thinking effort") }
+				: undefined;
 		},
 	},
 ];

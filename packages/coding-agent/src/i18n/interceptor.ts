@@ -15,30 +15,17 @@ import { i18n } from "./index";
 // Slash Commands 拦截
 // ═══════════════════════════════════════════════════════════════════════════
 
-export interface SlashCommandTranslationInput {
-	name: string;
-	description: string;
-	subcommands?: Array<{ name: string; description: string }>;
-}
-
-export interface SlashCommandTranslationOutput {
-	description: string;
-	subcommands?: Array<{ name: string; description: string }>;
-}
-
 /**
- * 拦截单个 slash command 的描述字段，返回翻译后的值。
- * 调用方在 materialize 时传入原始数据，拦截层返回翻译。
+ * Palette text for one slash command. The key is derived from the command name, so
+ * the upstream English literal stays the fallback for any command we have not
+ * filled; callers resolve this at read time because `/settings` can switch language
+ * without rebuilding the command registry.
  */
-export function interceptSlashCommand(input: SlashCommandTranslationInput): SlashCommandTranslationOutput {
-	const result: SlashCommandTranslationOutput = {
-		description: i18n.t(`commands.${input.name}.description`, input.description),
-	};
-	if (input.subcommands) {
-		result.subcommands = input.subcommands.map(sub => ({
-			...sub,
-			description: i18n.t(`commands.${input.name}.subcommands.${sub.name}.description`, sub.description),
-		}));
-	}
-	return result;
+export function slashCommandDescription(name: string, english: string): string {
+	return i18n.t(`commands.${name}.description`, english);
+}
+
+/** Palette text for one subcommand, keyed under its parent command. */
+export function subcommandDescription(commandName: string, subName: string, english: string): string {
+	return i18n.t(`commands.${commandName}.subcommands.${subName}.description`, english);
 }
